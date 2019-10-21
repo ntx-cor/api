@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__.'/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
@@ -16,14 +15,23 @@ require_once __DIR__.'/../vendor/autoload.php';
 | application as an "IoC" container and router for this framework.
 |
 */
-
 $app = new Laravel\Lumen\Application(
-    dirname(__DIR__)
+    realpath(__DIR__.'/../')
 );
+/*$app = new Laravel\Lumen\Application(
+    dirname(__DIR__)
+);*/
 
-// $app->withFacades();
-
-// $app->withEloquent();
+foreach (new DirectoryIterator(__DIR__.'/../config') as $file)
+{
+    if (!$file->isDot() && !$file->isDir() && $file->getExtension() == 'php' && $file->isFile())
+    {
+        $fileName = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+        $app->configure($fileName);
+    }
+}
+ $app->withFacades();
+ $app->withEloquent();
 
 /*
 |--------------------------------------------------------------------------
@@ -57,13 +65,13 @@ $app->singleton(
 |
 */
 
-// $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
-// ]);
+$app->middleware([
+    App\Http\Middleware\ExampleMiddleware::class
+]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+$app->routeMiddleware([
+    'auth' => App\Http\Middleware\Authenticate::class,
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -76,10 +84,11 @@ $app->singleton(
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
-// $app->register(App\Providers\EventServiceProvider::class);
-
+$app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AuthServiceProvider::class);
+$app->register(App\Providers\EventServiceProvider::class);
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+$app->register(Prettus\Repository\Providers\RepositoryServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
@@ -93,8 +102,9 @@ $app->singleton(
 
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
+    'prefix'=>'api'
 ], function ($router) {
-//    require __DIR__.'/../routes/web.php';
+//    require __DIR__.'/../routes/routes.php';
     foreach (new DirectoryIterator(__DIR__.'/../routes') as $file)
     {
         if (!$file->isDot() && !$file->isDir() && $file->getFilename() != '.gitignore')
