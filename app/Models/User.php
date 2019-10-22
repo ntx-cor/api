@@ -14,7 +14,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
 {
     use Authenticatable, Authorizable;
 
-    protected $table = 'users';
+    protected $table = 'user';
 
     protected $fillable = [
         'username', 'email', 'password',
