@@ -16,4 +16,8 @@ class UserRepository extends BaseRepository
         $user = $this->model->find($id);
         return $user;
     }
+    public function getPermission($id){
+        $res = $this->model->permissions($id);
+        return $res;
+    }
 }

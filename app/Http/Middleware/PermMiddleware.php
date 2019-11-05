@@ -2,10 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-class Authenticate
+class PermMiddleware
 {
     /**
      * The authentication guard factory instance.
@@ -33,10 +35,21 @@ class Authenticate
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle($request, Closure $next, ...$perm)
     {
-        if ($this->auth->guard($guard)->guest()) {
-            return response('Unauthorized.', 401);
+//        $perm = array_slice(func_get_args(),2);
+//        dd($this->auth->guard());
+        $auth = JWTAuth::user();
+        $userPerm = User::permissions($auth->id);
+        $hasPerm = false;
+        foreach ($perm as $p){
+            if(in_array($p,$userPerm)){
+                $hasPerm = true;
+                break;
+            }
+        }
+        if(!$hasPerm){
+            return response('Permission denied.', 403);
         }
         return $next($request);
     }

@@ -4,6 +4,7 @@
 namespace App\Models;
 
 
+use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,10 +14,13 @@ class BaseModel extends Model
     {
         parent::__construct($attributes);
     }
-    public function table(){
+    /**
+     * @return string
+     */
+    public static function table(){
         return (new static)->getTable();
     }
-    public function column($column){
+    public static function column($column){
         return self::table() . '.' . $column;
     }
     public static function boot() {

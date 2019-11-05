@@ -71,6 +71,7 @@ $app->middleware([
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+    'perm' => App\Http\Middleware\PermMiddleware::class,
 ]);
 
 /*
