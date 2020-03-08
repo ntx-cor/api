@@ -72,15 +72,21 @@ class BaseController extends Controller
     const HTTP_NOT_EXTENDED = 510;                                                // RFC2774
     const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;                             // RFC6585
 
+    protected $repo;
+    protected $req;
+
     public function __construct()
     {
+        $this->req = app('request');
     }
     public function response($data,$message='',$success=true,$statusCode=Response::HTTP_OK,$header=[]){
         if(empty($message) && array_key_exists('message',$data)){
             $message = $data['message'];
+            unset($data['message']);
         }
         if(array_key_exists('success',$data)){
             $success = $data['success'];
+            unset($data['success']);
         }
         if(array_key_exists('data',$data)){
             $data = $data['data'];

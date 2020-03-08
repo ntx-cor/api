@@ -7,21 +7,23 @@ namespace App\Models;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Laravel\Lumen\Auth\Authorizable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
-    use Authenticatable, Authorizable;
-
+    use Authenticatable, Authorizable, SoftDeletes;
     protected $table = 'user';
+    protected $dates = ['deleted_at'];
 
-    protected $fillable = [
-        'username', 'email', 'password',
-    ];
+    protected $guarded = [];
+//    protected $fillable = [
+//        'username', 'email', 'password',
+//    ];
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token','created_by','updated_by'
     ];
 
     public function getJWTIdentifier()

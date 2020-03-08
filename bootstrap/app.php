@@ -1,4 +1,7 @@
 <?php
+
+use App\Http\Middleware\ExampleMiddleware;
+
 require_once __DIR__.'/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
@@ -65,10 +68,12 @@ $app->singleton(
 |
 */
 
-$app->middleware([
+/*$app->middleware([
     App\Http\Middleware\ExampleMiddleware::class
+]);*/
+$app->middleware([
+    App\Http\Middleware\CorsMiddleware::class
 ]);
-
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
     'perm' => App\Http\Middleware\PermMiddleware::class,

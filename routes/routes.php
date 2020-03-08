@@ -19,7 +19,6 @@ $router->group([
         'uses'=>'AuthController@info',
         'middleware'=>'auth'
     ]);
-
 });
 
 $router->group([
@@ -31,9 +30,18 @@ $router->group([
         'as'=>'user.list',
         'uses'=>'UserController@getListUser'
     ]);
+    $router->post('',[
+        'middleware'=>"perm:dashboard_list",
+        'as'=>'user.create',
+        'uses'=>'UserController@create'
+    ]);
+    $router->put('/{id:[0-9]+}',[
+        'as'=>'user.update',
+        'uses'=>'UserController@update'
+    ]);
     $router->get('/{id:[0-9]+}',[
         'as'=>'user.detail',
-        'uses'=>'UserController@getUser'
+        'uses'=>'UserController@detail'
     ]);
     $router->get('menu',[
         'as'=>'user.menu',
@@ -42,5 +50,83 @@ $router->group([
     $router->get('permission',[
         'as'=>'user.permission',
         'uses'=>'UserController@getPermission'
+    ]);
+});
+
+$router->group([
+    'prefix'=>'category',
+    'middleware'=>'auth'
+],function ($router){
+    $router->get('',[
+        'as'=>'category.list',
+        'uses'=>'CategoryController@getList'
+    ]);
+    $router->post('',[
+        'as'=>'category.create',
+        'uses'=>'CategoryController@create'
+    ]);
+    $router->put('/{id:[0-9]+}',[
+        'as'=>'category.update',
+        'uses'=>'CategoryController@update'
+    ]);
+    $router->get('/{id:[0-9]+}',[
+        'as'=>'category.detail',
+        'uses'=>'CategoryController@detail'
+    ]);
+    $router->delete('/{id:[0-9]+}',[
+        'as'=>'category.delete',
+        'uses'=>'CategoryController@delete'
+    ]);
+});
+
+$router->group([
+   'prefix'=>'product',
+   'middleware'=>'auth'
+],function($router){
+    $router->get('',[
+       'as'=>'product.list',
+       'uses'=>'ProductController@getList'
+    ]);
+    $router->get('/{id:[0-9]+}',[
+        'as'=>'product.detail',
+        'uses'=>'ProductController@detail'
+    ]);
+    $router->post('/{id:[0-9]+}',[
+        'as'=>'product.update',
+        'uses'=>'ProductController@update'
+    ]);
+    $router->post('',[
+        'as'=>'product.create',
+        'uses'=>'ProductController@create'
+    ]);
+    $router->delete('/{id:[0-9]+}',[
+       'as'=>'product.delete',
+       'uses'=>'ProductController@delete'
+    ]);
+});
+
+$router->group([
+    'prefix'=>'order',
+    'middleware'=>'auth'
+],function($router){
+    $router->get('',[
+        'as'=>'order.list',
+        'uses'=>'OrderController@getList'
+    ]);
+    $router->get('/{id:[0-9]+}',[
+        'as'=>'order.detail',
+        'uses'=>'OrderController@detail'
+    ]);
+    $router->post('/{id:[0-9]+}',[
+        'as'=>'order.update',
+        'uses'=>'OrderController@update'
+    ]);
+    $router->post('',[
+        'as'=>'order.create',
+        'uses'=>'OrderController@create'
+    ]);
+    $router->delete('/{id:[0-9]+}',[
+        'as'=>'order.delete',
+        'uses'=>'OrderController@delete'
     ]);
 });
