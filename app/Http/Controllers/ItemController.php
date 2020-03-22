@@ -4,9 +4,9 @@
 namespace App\Http\Controllers;
 
 
-use App\Repositories\ProductRepository;
+use App\Repositories\ItemRepository;
 
-class ProductController extends BaseController
+class ItemController extends BaseController
 {
     public function __construct()
     {
@@ -16,25 +16,25 @@ class ProductController extends BaseController
         $params = $this->req;
 //        dd($params->variants);
 //        dd(json_decode($params->attrs));
-        $res = ProductRepository::instance()->create($params);
+        $res = ItemRepository::instance()->create($params);
         return $res;
     }
     public function update($id){
         $params = $this->req;
-        $res = ProductRepository::instance()->update($id,$params);
+        $res = ItemRepository::instance()->update($id,$params);
         return $this->response($res);
     }
     public function detail($id){
-        $res = ProductRepository::instance()->detail($id);
+        $res = ItemRepository::instance()->detail($id);
         return $this->response($res);
     }
     public function delete($id){
-        $res = ProductRepository::instance()->delete($id);
+        $res = ItemRepository::instance()->delete($id);
         return $this->response($res);
     }
     public function getList(){
         $params = $this->req;
-        $res = ProductRepository::instance()->getList($params);
+        $res = ItemRepository::instance()->getList($params);
         return $this->response($res);
     }
 }

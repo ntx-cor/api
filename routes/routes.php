@@ -80,28 +80,28 @@ $router->group([
 });
 
 $router->group([
-   'prefix'=>'product',
+   'prefix'=>'item',
    'middleware'=>'auth'
 ],function($router){
     $router->get('',[
-       'as'=>'product.list',
-       'uses'=>'ProductController@getList'
+       'as'=>'item.list',
+       'uses'=>'ItemController@getList'
     ]);
     $router->get('/{id:[0-9]+}',[
-        'as'=>'product.detail',
-        'uses'=>'ProductController@detail'
+        'as'=>'item.detail',
+        'uses'=>'ItemController@detail'
     ]);
     $router->post('/{id:[0-9]+}',[
-        'as'=>'product.update',
-        'uses'=>'ProductController@update'
+        'as'=>'item.update',
+        'uses'=>'ItemController@update'
     ]);
     $router->post('',[
-        'as'=>'product.create',
-        'uses'=>'ProductController@create'
+        'as'=>'item.create',
+        'uses'=>'ItemController@create'
     ]);
     $router->delete('/{id:[0-9]+}',[
-       'as'=>'product.delete',
-       'uses'=>'ProductController@delete'
+       'as'=>'item.delete',
+       'uses'=>'ItemController@delete'
     ]);
 });
 

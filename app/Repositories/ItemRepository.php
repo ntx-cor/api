@@ -6,39 +6,39 @@ namespace App\Repositories;
 
 use App\Libraries\Helpers;
 use App\Models\Inventory;
-use App\Models\Product;
-use App\Models\ProductAttribute;
-use App\Models\ProductDesc;
-use App\Models\ProductImage;
-use App\Models\ProductPrice;
-use App\Models\ProductSKU;
-use App\Models\ProductVariant;
+use App\Models\Item;
+use App\Models\ItemAttribute;
+use App\Models\ItemDesc;
+use App\Models\ItemImage;
+use App\Models\ItemPrice;
+use App\Models\ItemSKU;
+use App\Models\ItemVariant;
 
-class ProductRepository extends BaseRepository
+class ItemRepository extends BaseRepository
 {
     public function model()
     {
-        return Product::class;
+        return Item::class;
     }
     public function getList($params){
         $limit = $params->get('limit');
         $query = $this->model->select('*');
-        $res = $query->paginate($limit);
-        return $res;
+//        $res = $query->paginate($limit);
+        return $this->pagination($query,$limit);
     }
     public function detail($id){
-        $product = $this->model->find($id);
-        if(empty($product)){
+        $item = $this->model->find($id);
+        if(empty($item)){
             return null;
         }
-        return $product;
+        return $item;
     }
     public function create($params)
     {
         $desc = $params->get('desc');
         $variants = $params->get('variants');
         $attrs = $params->get('attrs');
-        $dataProduct = [
+        $dataItem = [
             'name'=>$params->get('name'),
             'category_id'=>$params->get('category_id'),
             'status'=>$params->get('status'),
@@ -48,34 +48,34 @@ class ProductRepository extends BaseRepository
             'url_seo'=>$params->get('url_seo'),
             'priority'=>$params->get('priority'),
             'manufacturer_id'=>$params->get('manufacturer_id'),
-        ];
-        $product = $this->model->create($dataProduct);
-        $productId = $product->id;
-        $product->desc = [];
-        $product->attrs = [];
-        $product->skus = [];
-        $product->variants = [];
-        $product->prices = [];
+        ];c
+        $item = $this->model->create($dataItem);
+        $itemId = $item->id;
+        $item->desc = [];
+        $item->attrs = [];
+        $item->skus = [];
+        $item->variants = [];
+        $item->prices = [];
         if(!empty($desc)){
             $desc = json_decode($desc);
             $dataDesc = [
                 'short_desc'=>$desc->short_desc??null,
                 'long_desc'=>$desc->long_desc??null,
-                'product_id'=>$productId
+                'item_id'=>$itemId
             ];
-            $product->desc = ProductDesc::create($dataDesc);
+            $item->desc = ItemDesc::create($dataDesc);
         }
         if(!empty($attrs)){
             $attrs = json_decode($attrs);
             $attrRes = [];
             foreach ($attrs as $attr){
-                $attrRes[]=ProductAttribute::create([
-                    "product_id"=>$productId,
+                $attrRes[]=ItemAttribute::create([
+                    "item_id"=>$itemId,
                     "name"=>$attr->name??"",
                     "desc"=>$attr->desc??"",
                 ]);
             }
-            $product->attrs = $attrRes;
+            $item->attrs = $attrRes;
         }
         if(!empty($variants)){
             $variants = json_decode($variants);
@@ -116,43 +116,43 @@ class ProductRepository extends BaseRepository
             $skus = [];
             $prices = [];
             foreach ($res as $variant){
-                $skus[] = $sku = ProductSKU::create([
-                    'product_id'=>$productId,
+                $skus[] = $sku = ItemSKU::create([
+                    'item_id'=>$itemId,
                     'sku'       =>self::generateSku(),
                     'status'    =>ENABLE
                 ]);
                 foreach ($variant as $v){
-                    $variants[]= ProductVariant::create([
-                        'product_id'        =>$productId,
-                        'product_sku_id'    =>$sku->id,
+                    $variants[]= ItemVariant::create([
+                        'item_id'        =>$itemId,
+                        'item_sku_id'    =>$sku->id,
                         'variant_value_id'  =>$v,
                         'status'            =>ENABLE
                     ]);
                 }
-                $prices[]=ProductPrice::create([
-                    'product_id'        =>$productId,
-                    'product_sku_id'    =>$sku->id,
+                $prices[]=ItemPrice::create([
+                    'item_id'        =>$itemId,
+                    'item_sku_id'    =>$sku->id,
                     'status'            =>ENABLE
                 ]);
                 /*$inventories[]=Inventory::create([
-                    'product_id'        =>$productId,
-                    'product_sku_id'    =>$sku->id,
+                    'item_id'        =>$itemId,
+                    'item_sku_id'    =>$sku->id,
                     'status'            =>ENABLE
                 ]);*/
             }
-            $product->skus = $skus;
-            $product->variants = $variants;
-            $product->prices = $prices;
+            $item->skus = $skus;
+            $item->variants = $variants;
+            $item->prices = $prices;
         }
         $files = $params->files;
-        self::uploadProductImage($productId, $files);
-        return $product;
+        self::uploadItemImage($itemId, $files);
+        return $item;
     }
     public function update($id,$params){
         $result = ["success"=>false,'message'=>''];
-        $product = $this->model->find($id);
-        if(empty($product)){
-            $result['message']="Product not found";
+        $item = $this->model->find($id);
+        if(empty($item)){
+            $result['message']="Item not found";
             return $result;
         }
 
@@ -170,32 +170,32 @@ class ProductRepository extends BaseRepository
             'priority'=>$params->get('priority'),
             'manufacturer_id'=>$params->get('manufacturer_id'),
         ];
-        $product->update($dataProduct);
-        $product->desc = [];
-        $product->attrs = [];
-        $product->skus = [];
-        $product->variants = [];
-        $product->prices = [];
+        $item->update($dataProduct);
+        $item->desc = [];
+        $item->attrs = [];
+        $item->skus = [];
+        $item->variants = [];
+        $item->prices = [];
         if(!empty($desc)){
             $desc = json_decode($desc);
             $dataDesc = [
                 'short_desc'=>$desc->short_desc??null,
                 'long_desc'=>$desc->long_desc??null,
-                'product_id'=>$id
+                'item_id'=>$id
             ];
-            $product->desc = ProductDesc::create($dataDesc);
+            $item->desc = ProductDesc::create($dataDesc);
         }
         if(!empty($attrs)){
             $attrs = json_decode($attrs);
             $attrRes = [];
             foreach ($attrs as $attr){
                 $attrRes[]=ProductAttribute::create([
-                    "product_id"=>$id,
+                    "item_id"=>$id,
                     "name"=>$attr->name??"",
                     "desc"=>$attr->desc??"",
                 ]);
             }
-            $product->attrs = $attrRes;
+            $item->attrs = $attrRes;
         }
         if(!empty($variants)){
             $variants = json_decode($variants);
@@ -237,40 +237,40 @@ class ProductRepository extends BaseRepository
             $prices = [];
             foreach ($res as $variant){
                 $skus[] = $sku = ProductSKU::create([
-                    'product_id'=>$id,
+                    'item_id'=>$id,
                     'sku'       =>self::generateSku(),
                     'status'    =>ENABLE
                 ]);
                 foreach ($variant as $v){
                     $variants[]= ProductVariant::create([
-                        'product_id'        =>$id,
-                        'product_sku_id'    =>$sku->id,
+                        'item_id'        =>$id,
+                        'item_sku_id'    =>$sku->id,
                         'variant_value_id'  =>$v,
                         'status'            =>ENABLE
                     ]);
                 }
                 $prices[]=ProductPrice::create([
-                    'product_id'        =>$id,
-                    'product_sku_id'    =>$sku->id,
+                    'item_id'        =>$id,
+                    'item_sku_id'    =>$sku->id,
                     'status'            =>ENABLE
                 ]);
                 /*$inventories[]=Inventory::create([
-                    'product_id'        =>$productId,
-                    'product_sku_id'    =>$sku->id,
+                    'item_id'        =>$itemId,
+                    'item_sku_id'    =>$sku->id,
                     'status'            =>ENABLE
                 ]);*/
             }
-            $product->skus = $skus;
-            $product->variants = $variants;
-            $product->prices = $prices;
+            $item->skus = $skus;
+            $item->variants = $variants;
+            $item->prices = $prices;
         }
         $files = $params->files;
         self::uploadProductImage($id, $files);
-        return $product;
+        return $item;
 
         $result['success']=true;
         $result['message'] = 'Product was updated successfully';
-        $item = json_decode(json_encode($product),true);
+        $item = json_decode(json_encode($item),true);
         $result = array_merge($result,$item);
         return $result;
     }
@@ -281,11 +281,11 @@ class ProductRepository extends BaseRepository
             $result['message'] = "Item not found";
             return $result;
         }
-        ProductDesc::where('product_id',$id)->delete();
-        ProductAttribute::where('product_id',$id)->delete();
-        ProductSKU::where('product_id',$id)->delete();
-        ProductVariant::where('product_id',$id)->delete();
-        ProductPrice::where('product_id',$id)->delete();
+        ProductDesc::where('item_id',$id)->delete();
+        ProductAttribute::where('item_id',$id)->delete();
+        ProductSKU::where('item_id',$id)->delete();
+        ProductVariant::where('item_id',$id)->delete();
+        ProductPrice::where('item_id',$id)->delete();
         $item->delete();
         $result['success']=true;
         $result['message']='Item deleted successfully';
@@ -303,10 +303,10 @@ class ProductRepository extends BaseRepository
                     $url = Helpers::uploadImage($v['file'],PATH_IMAGE_ITEM,$id.'_'.$k.'_');
                     if($url['status']){
                         if(!empty($v['id']))
-                            ProductImage::where('product_id',$id)->where('id',$v['id'])->delete();
+                            ProductImage::where('item_id',$id)->where('id',$v['id'])->delete();
                         $urlFiles[]=[
-                            'product_id'=>$id,
-                            'product_sku_id'=>$v['product_sku_id'],
+                            'item_id'=>$id,
+                            'item_sku_id'=>$v['item_sku_id'],
                             'url'=>$url['url'],
                             'status'=>ENABLE,
                             'priority'=>$v['priority']??0
@@ -318,10 +318,10 @@ class ProductRepository extends BaseRepository
         if(!empty($imgDel)){
 //            $imgDel = explode(',',$imgDel);
             foreach ($imgDel as $v){
-                $image = ProductImage::where('product_id',$id)->where('id',$v)->first();
+                $image = ProductImage::where('item_id',$id)->where('id',$v)->first();
                 try{
                     if($image){
-                        ProductImage::where('product_id',$id)->where('id',$v)->delete();
+                        ProductImage::where('item_id',$id)->where('id',$v)->delete();
                         unlink('../public'.$image['url']);
                     }
                 }
