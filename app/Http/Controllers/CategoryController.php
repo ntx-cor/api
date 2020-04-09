@@ -68,5 +68,8 @@ class CategoryController extends BaseController
         $res = $this->repo->getList($params);
         return $this->response($res);
     }
-
+    public function getOption(){
+        $res = $this->repo->getOption();
+        return $this->response($res);
+    }
 }

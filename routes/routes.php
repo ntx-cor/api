@@ -77,6 +77,10 @@ $router->group([
         'as'=>'category.delete',
         'uses'=>'CategoryController@delete'
     ]);
+    $router->get('/option',[
+        'as'=>'category.option',
+        'uses'=>'CategoryController@getOption'
+    ]);
 });
 
 $router->group([
@@ -128,5 +132,38 @@ $router->group([
     $router->delete('/{id:[0-9]+}',[
         'as'=>'order.delete',
         'uses'=>'OrderController@delete'
+    ]);
+});
+$router->group([
+    'prefix'=>'variant',
+    'middleware'=>'auth'
+],function($router){
+//    $router->get('',[
+//        'as'=>'variant.list',
+//        'uses'=>'VariantController@getList'
+//    ]);
+//    $router->get('/{id:[0-9]+}',[
+//        'as'=>'variant.detail',
+//        'uses'=>'VariantController@detail'
+//    ]);
+//    $router->put('/{id:[0-9]+}',[
+//        'as'=>'variant.update',
+//        'uses'=>'VariantController@update'
+//    ]);
+//    $router->post('',[
+//        'as'=>'variant.create',
+//        'uses'=>'VariantController@create'
+//    ]);
+//    $router->delete('/{id:[0-9]+}',[
+//        'as'=>'variant.delete',
+//        'uses'=>'VariantController@delete'
+//    ]);
+    $router->get('/{id:[0-9]+}/value',[
+        'as'=>'variant.detail.value',
+        'uses'=>'VariantController@getValueByVariant'
+    ]);
+    $router->get('/option',[
+        'as'=>'variant.option',
+        'uses'=>'VariantController@getOption'
     ]);
 });

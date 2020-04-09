@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 
 use App\Repositories\ItemRepository;
+use App\Repositories\ItemSkuRepository;
 
 class ItemController extends BaseController
 {
@@ -14,10 +15,8 @@ class ItemController extends BaseController
     }
     public function create(){
         $params = $this->req;
-//        dd($params->variants);
-//        dd(json_decode($params->attrs));
         $res = ItemRepository::instance()->create($params);
-        return $res;
+        return $this->response($res);
     }
     public function update($id){
         $params = $this->req;

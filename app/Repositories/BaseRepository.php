@@ -39,4 +39,33 @@ abstract class BaseRepository extends Repository
         $result = $query->paginate($limit);
         return $this->formatPagination($result);
     }
+    public function generateCode($prefixOrFormat="",$column="code"){
+        $leadZ = 7;
+        $lstNum = 1;
+        $query = $this->model->newQuery();
+
+        if(!empty($prefixOrFormat)){
+            $query = $query->where($column,'like',"%$prefixOrFormat%");
+        }
+        $lstCd = $query->orderBy($column,'DESC')->first();
+        if(!empty($lstCd)){
+            $arrCd = explode('-',$lstCd->{$column});
+            $lsSplit = count($arrCd);
+            if($lsSplit>0){
+                $lstNum = (int)$arrCd[$lsSplit-1]+1;
+            }
+        }
+        if(!empty($prefixOrFormat)){
+            $isFormat = count(explode('-',$prefixOrFormat))>1;
+            if($isFormat){
+                $cd = sprintf($prefixOrFormat,$lstNum);
+            }
+            else{
+                $cd = sprintf($prefixOrFormat."-%0{$leadZ}d",$lstNum);
+            }
+        }else{
+            $cd = sprintf("%0{$leadZ}d",$lstNum);
+        }
+        return $cd;
+    }
 }

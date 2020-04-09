@@ -38,4 +38,9 @@ class CategoryRepository extends BaseRepository
             ->paginate($limit);
         return $query;
     }
+    public function getOption(){
+        $query = $this->model->select("*")
+            ->get();
+        return $query;
+    }
 }

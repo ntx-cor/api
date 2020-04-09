@@ -10,9 +10,12 @@ use App\Models\Item;
 use App\Models\ItemAttribute;
 use App\Models\ItemDesc;
 use App\Models\ItemImage;
+use App\Models\ItemInfo;
 use App\Models\ItemPrice;
-use App\Models\ItemSKU;
+use App\Models\ItemSku;
 use App\Models\ItemVariant;
+use App\Models\Variant;
+use App\Models\VariantValue;
 
 class ItemRepository extends BaseRepository
 {
@@ -21,9 +24,9 @@ class ItemRepository extends BaseRepository
         return Item::class;
     }
     public function getList($params){
-        $limit = $params->get('limit');
-        $query = $this->model->select('*');
-//        $res = $query->paginate($limit);
+        $limit = $params->get('limit')??1000;
+        $query = $this->model->select('*')
+            ->orderBy(Item::column('id'),'DESC');
         return $this->pagination($query,$limit);
     }
     public function detail($id){
@@ -31,6 +34,54 @@ class ItemRepository extends BaseRepository
         if(empty($item)){
             return null;
         }
+        $attributes = ItemAttribute::where('item_id',$id)->get();
+        $desc = ItemDesc::where('item_id',$id)->first();
+        $info = ItemInfo::where('item_id',$id)->first();
+        $images = ItemImage::where('item_id',$id)->get();
+        $skus = ItemSku::where('item_id',$id)->get()->keyBy('id');
+        $variants = ItemVariant::select([
+                ItemVariant::column('*'),
+                VariantValue::column('name').' AS variant_value_name',
+                VariantValue::column('code').' AS variant_value_code',
+                Variant::column('id'). ' AS variant_id',
+                Variant::column('name').' AS variant_name',
+                Variant::column('code').' AS variant_code'
+            ])
+            ->leftJoin(VariantValue::table(),VariantValue::column('id'),ItemVariant::column('variant_value_id'))
+            ->leftJoin(Variant::table(),Variant::column('id'),VariantValue::column('variant_id'))
+            ->groupBy(ItemVariant::column('id'))
+            ->where(ItemVariant::column('item_id'),$id)
+            ->get();
+        $variantRes = [];
+        if(!empty($variants)){
+            foreach ($variants as $variant){
+                if(!isset($variantRes[$variant->variant_id])){
+                    $variantRes[$variant->variant_id] = [
+                        'id'=>$variant->id,
+                        'variant_id'=>$variant->variant_id,
+                        'item_id'=>$variant->item_id,
+                        'values'=>[]
+                    ];
+                }
+                if(!in_array($variant->variant_value_id,$variantRes[$variant->variant_id]['values'])){
+                    $variantRes[$variant->variant_id]['values'][]=$variant->variant_value_id;
+                }
+                if(isset($skus[$variant->item_sku_id])){
+                    if(empty($skus[$variant->item_sku_id]->variant_value_name)){
+                        $skus[$variant->item_sku_id]->variant_value_name = $variant->variant_value_name;
+                    }else{
+                        $skus[$variant->item_sku_id]->variant_value_name = $skus[$variant->item_sku_id]->variant_value_name.", ".$variant->variant_value_name;
+                    }
+
+                }
+            }
+        }
+        $item->attrs = $attributes;
+        $item->desc = $desc;
+        $item->variants = array_values($variantRes);
+        $item->images = $images;
+        $item->info = $info;
+        $item->skus = array_values($skus->toArray());
         return $item;
     }
     public function create($params)
@@ -48,7 +99,7 @@ class ItemRepository extends BaseRepository
             'url_seo'=>$params->get('url_seo'),
             'priority'=>$params->get('priority'),
             'manufacturer_id'=>$params->get('manufacturer_id'),
-        ];c
+        ];
         $item = $this->model->create($dataItem);
         $itemId = $item->id;
         $item->desc = [];
@@ -78,13 +129,12 @@ class ItemRepository extends BaseRepository
             $item->attrs = $attrRes;
         }
         if(!empty($variants)){
-            $variants = json_decode($variants);
             $numV = 1;
             $arrV = [];
             foreach ($variants as $variant){
-                if(count($variant->values)>0){
-                    $numV *= count($variant->values);
-                    $arrV[]= $variant->values;
+                if(count($variant['values'])>0){
+                    $numV *= count($variant['values']);
+                    $arrV[]= $variant['values'];
                 }
             }
             $res = [];
@@ -116,9 +166,9 @@ class ItemRepository extends BaseRepository
             $skus = [];
             $prices = [];
             foreach ($res as $variant){
-                $skus[] = $sku = ItemSKU::create([
+                $skus[] = $sku = ItemSku::create([
                     'item_id'=>$itemId,
-                    'sku'       =>self::generateSku(),
+                    'sku'       =>ItemSkuRepository::instance()->generateCode('ITM','sku'),
                     'status'    =>ENABLE
                 ]);
                 foreach ($variant as $v){
@@ -145,7 +195,7 @@ class ItemRepository extends BaseRepository
             $item->prices = $prices;
         }
         $files = $params->files;
-        self::uploadItemImage($itemId, $files);
+//        self::uploadItemImage($itemId, $files);
         return $item;
     }
     public function update($id,$params){
@@ -159,7 +209,7 @@ class ItemRepository extends BaseRepository
         $desc = $params->get('desc');
         $variants = $params->get('variants');
         $attrs = $params->get('attrs');
-        $dataProduct = [
+        $dataItem = [
             'name'=>$params->get('name'),
             'category_id'=>$params->get('category_id'),
             'status'=>$params->get('status'),
@@ -170,7 +220,7 @@ class ItemRepository extends BaseRepository
             'priority'=>$params->get('priority'),
             'manufacturer_id'=>$params->get('manufacturer_id'),
         ];
-        $item->update($dataProduct);
+        $item->update($dataItem);
         $item->desc = [];
         $item->attrs = [];
         $item->skus = [];
@@ -183,13 +233,13 @@ class ItemRepository extends BaseRepository
                 'long_desc'=>$desc->long_desc??null,
                 'item_id'=>$id
             ];
-            $item->desc = ProductDesc::create($dataDesc);
+            $item->desc = ItemDesc::create($dataDesc);
         }
         if(!empty($attrs)){
             $attrs = json_decode($attrs);
             $attrRes = [];
             foreach ($attrs as $attr){
-                $attrRes[]=ProductAttribute::create([
+                $attrRes[]=ItemAttribute::create([
                     "item_id"=>$id,
                     "name"=>$attr->name??"",
                     "desc"=>$attr->desc??"",
@@ -236,20 +286,20 @@ class ItemRepository extends BaseRepository
             $skus = [];
             $prices = [];
             foreach ($res as $variant){
-                $skus[] = $sku = ProductSKU::create([
+                $skus[] = $sku = ItemSku::create([
                     'item_id'=>$id,
                     'sku'       =>self::generateSku(),
                     'status'    =>ENABLE
                 ]);
                 foreach ($variant as $v){
-                    $variants[]= ProductVariant::create([
+                    $variants[]= ItemVariant::create([
                         'item_id'        =>$id,
                         'item_sku_id'    =>$sku->id,
                         'variant_value_id'  =>$v,
                         'status'            =>ENABLE
                     ]);
                 }
-                $prices[]=ProductPrice::create([
+                $prices[]=ItemPrice::create([
                     'item_id'        =>$id,
                     'item_sku_id'    =>$sku->id,
                     'status'            =>ENABLE
@@ -265,11 +315,11 @@ class ItemRepository extends BaseRepository
             $item->prices = $prices;
         }
         $files = $params->files;
-        self::uploadProductImage($id, $files);
+        self::uploadItemImage($id, $files);
         return $item;
 
         $result['success']=true;
-        $result['message'] = 'Product was updated successfully';
+        $result['message'] = 'Item was updated successfully';
         $item = json_decode(json_encode($item),true);
         $result = array_merge($result,$item);
         return $result;
@@ -281,21 +331,21 @@ class ItemRepository extends BaseRepository
             $result['message'] = "Item not found";
             return $result;
         }
-        ProductDesc::where('item_id',$id)->delete();
-        ProductAttribute::where('item_id',$id)->delete();
-        ProductSKU::where('item_id',$id)->delete();
-        ProductVariant::where('item_id',$id)->delete();
-        ProductPrice::where('item_id',$id)->delete();
+        ItemDesc::where('item_id',$id)->delete();
+        ItemAttribute::where('item_id',$id)->delete();
+        ItemSku::where('item_id',$id)->delete();
+        ItemVariant::where('item_id',$id)->delete();
+        ItemPrice::where('item_id',$id)->delete();
         $item->delete();
         $result['success']=true;
         $result['message']='Item deleted successfully';
         return $result;
     }
     public function generateSku(){
-        $date = date('YmdHis');
+        $date = $this->model->generateCode("ITM");
         return $date;
     }
-    public function uploadProductImage($id,$files,$imgDel=[]){
+    public function uploadItemImage($id,$files,$imgDel=[]){
         $urlFiles = [];
         if($files){
             foreach ($files as $k=>$v){
@@ -303,7 +353,7 @@ class ItemRepository extends BaseRepository
                     $url = Helpers::uploadImage($v['file'],PATH_IMAGE_ITEM,$id.'_'.$k.'_');
                     if($url['status']){
                         if(!empty($v['id']))
-                            ProductImage::where('item_id',$id)->where('id',$v['id'])->delete();
+                            ItemImage::where('item_id',$id)->where('id',$v['id'])->delete();
                         $urlFiles[]=[
                             'item_id'=>$id,
                             'item_sku_id'=>$v['item_sku_id'],
@@ -318,10 +368,10 @@ class ItemRepository extends BaseRepository
         if(!empty($imgDel)){
 //            $imgDel = explode(',',$imgDel);
             foreach ($imgDel as $v){
-                $image = ProductImage::where('item_id',$id)->where('id',$v)->first();
+                $image = ItemImage::where('item_id',$id)->where('id',$v)->first();
                 try{
                     if($image){
-                        ProductImage::where('item_id',$id)->where('id',$v)->delete();
+                        ItemImage::where('item_id',$id)->where('id',$v)->delete();
                         unlink('../public'.$image['url']);
                     }
                 }
@@ -329,7 +379,7 @@ class ItemRepository extends BaseRepository
             }
         }
         if(count($urlFiles)>0){
-            ProductImage::insert($urlFiles);
+            ItemImage::insert($urlFiles);
         }
     }
 }
