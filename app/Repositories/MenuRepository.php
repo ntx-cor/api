@@ -17,8 +17,8 @@ class MenuRepository extends BaseRepository
             ->leftJoin('role_menu', 'role_menu.menu_id', 'menu.id')
             ->leftJoin('user_role', 'user_role.role_id', 'role_menu.role_id')
             ->where('user_role.user_id', $userId)
-            ->where('menu.status', ENABLE)
-            ->where('role_menu.status', ENABLE);
+            ->where('menu.ac', ACTIVE)
+            ->where('role_menu.ac', ACTIVE);
         $res = $query->get();
         return $res;
     }

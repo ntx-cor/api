@@ -14,12 +14,12 @@ class ItemController extends BaseController
         parent::__construct();
     }
     public function create(){
-        $params = $this->req;
+        $params = $this->request;
         $res = ItemRepository::instance()->create($params);
         return $this->response($res);
     }
     public function update($id){
-        $params = $this->req;
+        $params = $this->request;
         $res = ItemRepository::instance()->update($id,$params);
         return $this->response($res);
     }
@@ -32,7 +32,7 @@ class ItemController extends BaseController
         return $this->response($res);
     }
     public function getList(){
-        $params = $this->req;
+        $params = $this->request;
         $res = ItemRepository::instance()->getList($params);
         return $this->response($res);
     }

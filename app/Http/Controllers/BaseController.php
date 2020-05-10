@@ -73,11 +73,11 @@ class BaseController extends Controller
     const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;                             // RFC6585
 
     protected $repo;
-    protected $req;
+    protected $request;
 
     public function __construct()
     {
-        $this->req = app('request');
+        $this->request = app('request');
     }
     public function response($data,$message='',$success=true,$statusCode=Response::HTTP_OK,$header=[]){
         if(empty($message) && array_key_exists('message',$data)){

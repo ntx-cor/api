@@ -112,4 +112,13 @@ return [
     |
     */
 
+    'google' => [
+        'application_name' => 'truongxuan_web',
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect_uri' => env('GOOGLE_REDIRECT_URI'),
+//        'developer_key' => env('GOOGLE_DEVELOPER_KEY'),
+//        'prompt' => env('GOOGLE_PROMPT'),
+    ],
+    'server_upload'=>env('SERVER_UPLOAD',/*url('/')*/'')
 ];

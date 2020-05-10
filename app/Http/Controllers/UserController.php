@@ -15,7 +15,7 @@ class UserController extends BaseController
         Request $_request,
         UserRepository $_repo
     ){
-        $this->req = $_request;
+        $this->request = $_request;
         $this->repo = $_repo;
         $this->middleware('auth:api');
     }
@@ -24,7 +24,7 @@ class UserController extends BaseController
         return $this->response($user);
     }
     public function getListUser(){
-        $user = UserRepository::instance()->getList($this->req->all());
+        $user = UserRepository::instance()->getList($this->request->all());
         return $this->response($user);
     }
     public function getPermission(){
@@ -32,13 +32,13 @@ class UserController extends BaseController
         return $this->response($res);
     }
     public function create(){
-        $data = $this->req->only([
+        $data = $this->request->only([
             'username',
             'first_name',
             'last_name',
             'phone',
             'email',
-            'status',
+            'ac',
             'password'
         ]);
         if($data['password']){
@@ -51,16 +51,16 @@ class UserController extends BaseController
         return $this->response($res);
     }
     public function update($id){
-        $data = $this->req->only([
+        $data = $this->request->only([
             'username',
             'first_name',
             'last_name',
             'phone',
             'email',
-            'status'
+            'ac'
         ]);
-        if(!empty($this->req->get('password'))){
-            $data['password'] = Hash::make($this->req->get('password'));
+        if(!empty($this->request->get('password'))){
+            $data['password'] = Hash::make($this->request->get('password'));
         }
         $res = $this->repo->update($data,$id);
         return $this->response($res);

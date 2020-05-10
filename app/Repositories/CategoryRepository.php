@@ -33,10 +33,9 @@ class CategoryRepository extends BaseRepository
         return true;
     }
     public function getList($params){
-        $limit = $params->get('limit');
-        $query = $this->model->select("*")
-            ->paginate($limit);
-        return $query;
+        $limit = $params['limit']??LIMIT;
+        $query = $this->model->select("*");
+        return $this->pagination($query,$limit);
     }
     public function getOption(){
         $query = $this->model->select("*")
