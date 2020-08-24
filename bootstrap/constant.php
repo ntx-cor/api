@@ -1,7 +1,7 @@
 <?php
 define('LIMIT',15);
-define('ACTIVE',1);
-define('INACTIVE',0);
+define('ACTIVE','AT');
+define('INACTIVE','IA');
 
 define('GOOGLE','google');
 define('LOCAL','local');

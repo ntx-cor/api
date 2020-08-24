@@ -80,16 +80,18 @@ class BaseController extends Controller
         $this->request = app('request');
     }
     public function response($data,$message='',$success=true,$statusCode=Response::HTTP_OK,$header=[]){
-        if(empty($message) && array_key_exists('message',$data)){
-            $message = $data['message'];
-            unset($data['message']);
-        }
-        if(array_key_exists('success',$data)){
-            $success = $data['success'];
-            unset($data['success']);
-        }
-        if(array_key_exists('data',$data)){
-            $data = $data['data'];
+        if(!empty($data)){
+            if(empty($message) && array_key_exists('message',$data)){
+                $message = $data['message'];
+                unset($data['message']);
+            }
+            if(array_key_exists('success',$data)){
+                $success = $data['success'];
+                unset($data['success']);
+            }
+            if(array_key_exists('data',$data)){
+                $data = $data['data'];
+            }
         }
         $resp = [
             'success'=>$success,

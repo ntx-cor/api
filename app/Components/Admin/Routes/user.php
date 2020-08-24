@@ -1,0 +1,32 @@
+<?php
+$router->group([
+    'prefix'=>'user',
+    'middleware'=>'auth'
+],function($router){
+    $router->get('',[
+        'middleware'=>"perm:dashboard_list",
+        'as'=>'user.list',
+        'uses'=>'UserController@getListUser'
+    ]);
+    $router->post('',[
+        'middleware'=>"perm:dashboard_list",
+        'as'=>'user.create',
+        'uses'=>'UserController@create'
+    ]);
+    $router->put('/{id:[0-9]+}',[
+        'as'=>'user.update',
+        'uses'=>'UserController@update'
+    ]);
+    $router->get('/{id:[0-9]+}',[
+        'as'=>'user.detail',
+        'uses'=>'UserController@detail'
+    ]);
+    $router->get('menu',[
+        'as'=>'user.menu',
+        'uses'=>'MenuController@getMenuByUser'
+    ]);
+    $router->get('permission',[
+        'as'=>'user.permission',
+        'uses'=>'UserController@getPermission'
+    ]);
+});

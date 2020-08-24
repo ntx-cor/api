@@ -106,6 +106,16 @@ $app->register(Prettus\Repository\Providers\RepositoryServiceProvider::class);
 |
 */
 
+$cpnDir = scandir(__DIR__.'/../app/Components');
+foreach ($cpnDir as $k=>$cpn){
+    if($k>1){
+        $appPath = app()->basePath() . "/app/Components/$cpn/app.php";
+        if(file_exists($appPath)){
+            require_once $appPath;
+        }
+    }
+}
+
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
     'prefix'=>'api'

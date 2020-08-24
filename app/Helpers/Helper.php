@@ -16,7 +16,7 @@ class Helper{
             $server = LOCAL;
         }
         $result = [
-            'ac'=>false,
+            'status'=>false,
             'fileName'=>'',
             'id'=>''
         ];
@@ -36,7 +36,7 @@ class Helper{
                     $image->move($destinationPath, $name);
                     break;
             }
-            $result['ac']=true;
+            $result['status']=true;
             $result['url']= $path.$name;
             $result['id']=$id;
         }

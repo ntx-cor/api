@@ -1,0 +1,30 @@
+<?php
+$router->group([
+    'prefix'=>'category',
+    'middleware'=>'auth'
+],function ($router){
+    $router->get('',[
+        'as'=>'category.list',
+        'uses'=>'CategoryController@getList'
+    ]);
+    $router->post('',[
+        'as'=>'category.create',
+        'uses'=>'CategoryController@create'
+    ]);
+    $router->put('/{id:[0-9]+}',[
+        'as'=>'category.update',
+        'uses'=>'CategoryController@update'
+    ]);
+    $router->get('/{id:[0-9]+}',[
+        'as'=>'category.detail',
+        'uses'=>'CategoryController@detail'
+    ]);
+    $router->delete('/{id:[0-9]+}',[
+        'as'=>'category.delete',
+        'uses'=>'CategoryController@delete'
+    ]);
+    $router->get('/option',[
+        'as'=>'category.option',
+        'uses'=>'CategoryController@getOption'
+    ]);
+});

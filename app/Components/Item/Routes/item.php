@@ -1,0 +1,25 @@
+<?php
+$router->group([
+    'middleware'=>'auth'
+],function($router){
+    $router->get('',[
+        'as'=>'item.list',
+        'uses'=>'ItemController@getList'
+    ]);
+    $router->get('/{id:[0-9]+}',[
+        'as'=>'item.detail',
+        'uses'=>'ItemController@detail'
+    ]);
+    $router->post('/{id:[0-9]+}',[
+        'as'=>'item.update',
+        'uses'=>'ItemController@update'
+    ]);
+    $router->post('',[
+        'as'=>'item.create',
+        'uses'=>'ItemController@create'
+    ]);
+    $router->delete('/{id:[0-9]+}',[
+        'as'=>'item.delete',
+        'uses'=>'ItemController@delete'
+    ]);
+});
